@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stride — Minimalist Step Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-main: hsl(0, 0%, 0%);
+      --bg-card: hsl(0, 0%, 4%);
+      --text-primary: hsl(0, 0%, 100%);
+      --text-secondary: hsla(0, 0%, 100%, 0.7);
+      --accent: hsl(355, 90%, 47%);
+      --glass-border: hsla(0, 0%, 100%, 0.1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body { width: 100%; min-height: 100%; }
+
+    body {
+      background: var(--bg-main);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrapper {
+      position: relative;
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---------- Navbar ---------- */
+    .navbar {
+      position: relative;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 32px 64px;
+    }
+
+    .logo {
+      font-family: 'Anton', sans-serif;
+      font-size: 1.8rem;
+      letter-spacing: 0.1em;
+      color: var(--text-primary);
+      text-transform: uppercase;
+    }
+
+    .logo .dot { color: var(--accent); }
+
+    .nav-links {
+      display: flex;
+      gap: 44px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+      font-weight: 400;
+      text-transform: uppercase;
+      transition: color 0.3s ease;
+    }
+
+    .nav-links a:hover { color: var(--text-primary); }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      position: relative;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 72vh;
+    }
+
+    .bg-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Anton', sans-serif;
+      font-size: 26vw;
+      line-height: 0.78;
+      letter-spacing: -0.03em;
+      color: #111111;
+      white-space: nowrap;
+      user-select: none;
+      z-index: 1;
+      opacity: 0;
+      animation: fadeBg 1s ease forwards;
+    }
+
+    .phone-mockup {
+      position: relative;
+      z-index: 10;
+      width: 320px;
+      height: 640px;
+      border-radius: 48px;
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 50px 140px rgba(0, 0, 0, 0.85), inset 0 0 0 7px #050505;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: translateY(60px);
+      opacity: 0;
+      animation: floatUp 1s ease 0.6s forwards, phoneFloat 4s ease-in-out 1.6s infinite;
+    }
+
+    .phone-mockup .screen {
+      width: 290px;
+      height: 610px;
+      border-radius: 38px;
+      background:
+        radial-gradient(circle at 50% 28%, rgba(229,9,20,0.10), transparent 60%),
+        var(--bg-main);
+      border: 1px solid var(--glass-border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 22px;
+    }
+
+    .phone-mockup .app-logo {
+      width: 120px;
+      height: 120px;
+      object-fit: contain;
+      border-radius: 26px;
+      box-shadow: 0 14px 40px rgba(229,9,20,0.25);
+    }
+
+    .phone-mockup .mock-label {
+      font-size: 0.8rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    /* ---------- Floating Glass Tooltip ---------- */
+    .tooltip {
+      position: absolute;
+      z-index: 20;
+      top: 50%;
+      left: 5%;
+      transform: translateY(-50%);
+      width: 320px;
+      padding: 28px 30px;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 16px;
+      border: 1px solid transparent;
+      background-clip: padding-box;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+      opacity: 0;
+      animation: fadeIn 0.8s ease 1.1s forwards;
+    }
+
+    .tooltip::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.45), rgba(255,255,255,0.02) 40%, rgba(255,255,255,0.02) 60%, rgba(255,255,255,0.18));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .tooltip h3 {
+      font-family: 'Anton', sans-serif;
+      font-size: 1.4rem;
+      letter-spacing: 0.04em;
+      margin-bottom: 14px;
+      font-weight: 400;
+    }
+
+    .tooltip h3 .accent-word { color: var(--accent); }
+
+    .tooltip p {
+      font-size: 0.9rem;
+      line-height: 1.7;
+      font-weight: 300;
+      color: var(--text-secondary);
+    }
+
+    .tooltip p + p { margin-top: 14px; }
+
+    .tooltip .privacy {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--glass-border);
+    }
+
+    .tooltip .privacy .lock { color: var(--accent); font-size: 1.1rem; line-height: 1.4; }
+
+    .tooltip .privacy span {
+      font-size: 0.82rem;
+      line-height: 1.5;
+      color: var(--text-primary);
+    }
+
+    /* ---------- Rotating Badge ---------- */
+    .badge {
+      position: absolute;
+      z-index: 25;
+      bottom: 9%;
+      right: 7%;
+      width: 140px;
+      height: 140px;
+      display: block;
+      text-decoration: none;
+    }
+
+    .badge svg {
+      width: 100%;
+      height: 100%;
+      animation: spin 14s linear infinite;
+    }
+
+    .badge .badge-text {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 2.5px;
+      fill: #000;
+    }
+
+    .badge .arrow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2.2rem;
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .badge .circle-bg { fill: #fff; }
+
+    /* ---------- Tech Stack ---------- */
+    .stack-section { position: relative; z-index: 15; padding: 70px 64px 30px; }
+
+    .stack-heading {
+      font-family: 'Anton', sans-serif;
+      font-size: 2.4rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 40px;
+      font-weight: 400;
+    }
+
+    .stack-heading .accent-word { color: var(--accent); }
+
+    .tech-stack {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 28px;
+    }
+
+    .tech-item {
+      padding: 24px 22px;
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      background: var(--bg-card);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: border-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .tech-item:hover { border-color: var(--accent); transform: translateY(-4px); }
+
+    .tech-item .label {
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .tech-item .value {
+      font-size: 1.15rem;
+      font-weight: 400;
+      color: var(--text-primary);
+      letter-spacing: 0.02em;
+    }
+
+    .tech-item .desc {
+      font-size: 0.82rem;
+      line-height: 1.55;
+      color: var(--text-secondary);
+      font-weight: 300;
+    }
+
+    .creator {
+      position: relative;
+      z-index: 15;
+      text-align: center;
+      padding: 50px 48px 56px;
+      font-size: 0.85rem;
+      letter-spacing: 0.12em;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+    }
+
+    .creator strong { color: var(--text-primary); font-weight: 500; }
+
+    /* ---------- Animations ---------- */
+    @keyframes fadeBg { to { opacity: 1; } }
+    @keyframes floatUp { to { transform: translateY(0); opacity: 1; } }
+    @keyframes phoneFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    @keyframes fadeIn { to { opacity: 1; } }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 1000px) {
+      .tech-stack { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 900px) {
+      .navbar { padding: 24px 28px; }
+      .tooltip { position: static; transform: none; width: auto; margin: 30px 24px 0; opacity: 1; }
+      .bg-text { font-size: 38vw; }
+      .badge { width: 110px; height: 110px; bottom: 4%; right: 4%; }
+      .stack-section { padding: 50px 28px 20px; }
+      .creator { padding: 40px 28px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <nav class="navbar">
+      <div class="logo">Stride<span class="dot">.</span></div>
+      <ul class="nav-links">
+        <li><a href="#app">App</a></li>
+        <li><a href="#stack">Tech</a></li>
+        <li><a href="https://github.com/mhd-farhanc/stride-app" target="_blank" rel="noopener">GitHub</a></li>
+      </ul>
+    </nav>
+
+    <section class="hero" id="app">
+      <div class="bg-text">STRIDE</div>
+
+      <aside class="tooltip">
+        <h3>A Step Tracker, <span class="accent-word">Done Right</span></h3>
+        <p>I'm proud to release Stride, a minimalist step tracker I built to practice my Flutter skills. My goal was a beautiful, private, and efficient app.</p>
+        <p>The step count resets every day, so you always start fresh and focused on today's movement.</p>
+        <div class="privacy">
+          <span class="lock">🔒</span>
+          <span><strong>Private by design.</strong> All of your health data stays on your device. Nothing is uploaded, shared, or tracked.</span>
+        </div>
+      </aside>
+
+      <div class="phone-mockup">
+        <div class="screen">
+          <img class="app-logo" src="images/logo.png" alt="Stride app logo" />
+          <div class="mock-label">Stride</div>
+        </div>
+      </div>
+
+      <a class="badge" href="https://github.com/mhd-farhanc/stride-app" target="_blank" rel="noopener" aria-label="Stride on GitHub">
+        <svg viewBox="0 0 130 130">
+          <circle class="circle-bg" cx="65" cy="65" r="63" />
+          <defs>
+            <path id="circlePath" d="M 65,65 m -48,0 a 48,48 0 1,1 96,0 a 48,48 0 1,1 -96,0" />
+          </defs>
+          <text class="badge-text">
+            <textPath href="#circlePath" startOffset="0%">OPEN SOURCE • GITHUB • APP • </textPath>
+          </text>
+        </svg>
+        <span class="arrow">↗</span>
+      </a>
+    </section>
+
+    <section class="stack-section" id="stack">
+      <h2 class="stack-heading">Built With <span class="accent-word">Precision</span></h2>
+      <div class="tech-stack">
+        <div class="tech-item">
+          <span class="label">Framework</span>
+          <span class="value">Flutter</span>
+          <span class="desc">Cross-platform UI toolkit that powers Stride's smooth, native-feeling interface on every device.</span>
+        </div>
+        <div class="tech-item">
+          <span class="label">Database</span>
+          <span class="value">Hive</span>
+          <span class="desc">A lightweight on-device storage engine that keeps your step history fully local and offline.</span>
+        </div>
+        <div class="tech-item">
+          <span class="label">Charts</span>
+          <span class="value">fl_chart</span>
+          <span class="desc">Renders Stride's clean weekly and monthly activity graphs with zero lag.</span>
+        </div>
+        <div class="tech-item">
+          <span class="label">Hardware</span>
+          <span class="value">Pedometer</span>
+          <span class="desc">Reads live step data straight from your phone's built-in motion sensors.</span>
+        </div>
+        <div class="tech-item">
+          <span class="label">Permissions</span>
+          <span class="value">permission_handler</span>
+          <span class="desc">Gracefully requests only the activity access Stride needs, and nothing more.</span>
+        </div>
+      </div>
+    </section>
+
+    <p class="creator">Created by <strong>Muhammed Farhan C</strong></p>
+  </div>
+</body>
+</html>
