@@ -46,12 +46,12 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 32px 64px;
+      padding: clamp(20px, 4vw, 32px) clamp(20px, 5vw, 64px);
     }
 
     .logo {
       font-family: 'Anton', sans-serif;
-      font-size: 1.8rem;
+      font-size: clamp(1.4rem, 5vw, 1.8rem);
       letter-spacing: 0.1em;
       color: var(--text-primary);
       text-transform: uppercase;
@@ -61,7 +61,7 @@
 
     .nav-links {
       display: flex;
-      gap: 44px;
+      gap: clamp(20px, 4vw, 44px);
       list-style: none;
     }
 
@@ -107,9 +107,9 @@
     .phone-mockup {
       position: relative;
       z-index: 10;
-      width: 320px;
-      height: 640px;
-      border-radius: 48px;
+      width: min(320px, 78vw);
+      aspect-ratio: 320 / 640;
+      border-radius: clamp(36px, 15vw, 48px);
       background: var(--bg-card);
       border: 1px solid var(--glass-border);
       box-shadow: 0 50px 140px rgba(0, 0, 0, 0.85), inset 0 0 0 7px #050505;
@@ -122,9 +122,9 @@
     }
 
     .phone-mockup .screen {
-      width: 290px;
-      height: 610px;
-      border-radius: 38px;
+      width: 91%;
+      height: 95%;
+      border-radius: clamp(28px, 12vw, 38px);
       background:
         radial-gradient(circle at 50% 28%, rgba(229,9,20,0.10), transparent 60%),
         var(--bg-main);
@@ -259,7 +259,7 @@
     .badge .circle-bg { fill: #fff; }
 
     /* ---------- Tech Stack ---------- */
-    .stack-section { position: relative; z-index: 15; padding: 70px 64px 30px; }
+    .stack-section { position: relative; z-index: 15; padding: 70px clamp(24px, 5vw, 64px) 30px; }
 
     .stack-heading {
       font-family: 'Anton', sans-serif;
@@ -328,6 +328,7 @@
 
     /* ---------- Animations ---------- */
     @keyframes fadeBg { to { opacity: 1; } }
+    @keyframes fadeBgFaint { to { opacity: 0.6; } }
     @keyframes floatUp { to { transform: translateY(0); opacity: 1; } }
     @keyframes phoneFloat {
       0%, 100% { transform: translateY(0); }
@@ -343,13 +344,48 @@
     @media (max-width: 1000px) {
       .tech-stack { grid-template-columns: repeat(2, 1fr); }
     }
+
     @media (max-width: 900px) {
-      .navbar { padding: 24px 28px; }
-      .tooltip { position: static; transform: none; width: auto; margin: 30px 24px 0; opacity: 1; }
-      .bg-text { font-size: 38vw; }
-      .badge { width: 110px; height: 110px; bottom: 4%; right: 4%; }
-      .stack-section { padding: 50px 28px 20px; }
-      .creator { padding: 40px 28px; }
+      .hero {
+        flex-direction: column-reverse;
+        gap: 36px;
+        padding: 40px 24px 24px;
+        min-height: auto;
+      }
+      .bg-text { font-size: 44vw; opacity: 0; animation: fadeBgFaint 1s ease forwards; }
+      .phone-mockup { transform: translateY(40px); animation: floatUp 1s ease 0.4s forwards; }
+      .tooltip {
+        position: static;
+        transform: none;
+        width: 100%;
+        max-width: 420px;
+        margin: 0 auto;
+        opacity: 0;
+        animation: fadeIn 0.8s ease 0.8s forwards;
+      }
+      .badge {
+        position: static;
+        margin: 4px auto 0;
+        width: 96px;
+        height: 96px;
+      }
+      .stack-section { padding: 48px 24px 20px; }
+      .stack-heading { font-size: clamp(1.7rem, 8vw, 2.4rem); margin-bottom: 28px; }
+      .creator { padding: 36px 24px 44px; }
+    }
+
+    @media (max-width: 560px) {
+      .nav-links { gap: 18px; }
+      .nav-links a { font-size: 0.78rem; letter-spacing: 0.05em; }
+      .tech-stack { grid-template-columns: 1fr; gap: 16px; }
+      .tech-item { padding: 20px 20px; }
+      .tooltip { padding: 24px 22px; }
+      .tooltip h3 { font-size: 1.25rem; }
+    }
+
+    @media (max-width: 380px) {
+      .nav-links { gap: 12px; }
+      .nav-links a { font-size: 0.72rem; }
     }
   </style>
 </head>
